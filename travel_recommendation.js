@@ -1,19 +1,24 @@
-let travelData = [];
+let travelData = {};
 
-// Fetch JSON data
+// Load JSON
 fetch("travel_recommendation_api.json")
   .then(response => response.json())
   .then(data => {
     travelData = data;
-    console.log(data); // Check if data loads
+    console.log("Data loaded:", travelData);
   })
-  .catch(error => console.log("Error loading JSON:", error));
+  .catch(error => console.error("Error loading JSON:", error));
 
 // Search function
 function searchPlaces() {
     const keyword = document.getElementById("searchInput").value.toLowerCase();
     const resultsDiv = document.getElementById("results");
     resultsDiv.innerHTML = "";
+
+    if (!travelData.countries) {
+        resultsDiv.innerHTML = "<p>Loading data... Please try again.</p>";
+        return;
+    }
 
     if (keyword.includes("beach")) {
         displayResults(travelData.beaches);
@@ -22,7 +27,16 @@ function searchPlaces() {
         displayResults(travelData.temples);
     } 
     else if (keyword.includes("country")) {
-        displayResults(travelData.countries);
+
+        let countryResults = [];
+
+        travelData.countries.forEach(country => {
+            country.cities.forEach(city => {
+                countryResults.push(city);
+            });
+        });
+
+        displayResults(countryResults);
     } 
     else {
         resultsDiv.innerHTML = "<p>No results found</p>";
@@ -46,7 +60,7 @@ function displayResults(places) {
     });
 }
 
-// Reset results
+// Reset
 function clearResults() {
     document.getElementById("results").innerHTML = "";
     document.getElementById("searchInput").value = "";
